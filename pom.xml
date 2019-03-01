@@ -7,6 +7,22 @@
     <groupId>ch.hesso.webmining</groupId>
     <artifactId>webmininglab1</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+
+    <properties>
+        <!-- encodage projet -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- compilation source et target -->
+        <source.configuration.jdk>1.8</source.configuration.jdk>
+        <target.configuration.jdk>1.8</target.configuration.jdk>
+
+        <!-- ****** version des plugins ****** -->
+        <compiler.version>3.7.0</compiler.version>
+
+    </properties>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/edu.uci.ics/crawler4j -->
         <dependency>
@@ -15,5 +31,24 @@
             <version>4.4.0</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Maven compiler pluginX
+                 repo: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin
+                 doc: https://maven.apache.org/plugins/maven-compiler-plugin/index.html -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${compiler.version}</version>
+                    <configuration>
+                        <source>${source.configuration.jdk}</source>
+                        <target>${target.configuration.jdk}</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
