@@ -7,6 +7,7 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 public class App {
+
     public static void main(String[] args) throws Exception {
         final int NUMBER_OF_CRAWELRS = 2;
 
@@ -34,6 +35,7 @@ public class App {
     private static CrawlConfig initialiseConfig() {
         CrawlConfig config = new CrawlConfig();
         config.setMaxConnectionsPerHost(10);
+        config.setConnectionTimeout(4000);
         config.setSocketTimeout(5000);
         config.setCrawlStorageFolder("tmp");
         config.setIncludeHttpsPages(true);
@@ -46,5 +48,4 @@ public class App {
         config.setMaxPagesToFetch(2000);
         return config;
     }
-
 }
