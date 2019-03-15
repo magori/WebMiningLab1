@@ -15,21 +15,40 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class Crawler extends WebCrawler {
+    private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|bpm|jpe?g|png|mp3|mp4|zip|gz|xml|txt|pdf|))$");
 
-    private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg|png|mp3|mp4|zip|gz|txt|pdf|))$");
+    private final HttpSolrClient solrClient = connectToSolrClient();
 
-    private final HttpSolrClient solrClient =
-            new HttpSolrClient.Builder("http://localhost:8983/solr")
+    private HttpSolrClient connectToSolrClient() {
+        try {
+            return new HttpSolrClient.Builder("http://localhost:8983/solr/bigboxstore")
                     .withConnectionTimeout(10000)
                     .withSocketTimeout(60000)
                     .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public boolean shouldVisit(Page page, WebURL url) {
-        String href = url.getURL().toLowerCase();
-        return !FILTERS.matcher(href).matches()
-                && href.startsWith("http://www.commitstrip.com/fr/")
-                && page.getStatusCode() == 200;
+        checkIsHtml(url);
+
+        return !FILTERS.matcher(url.getURL().toLowerCase()).matches()
+                && page.getStatusCode() >= 200 && page.getStatusCode() < 300;
+    }
+
+    private void checkIsHtml(final WebURL url) {
+        String[] vals = url.getURL().toLowerCase().split("\\.(\\w*)");
+        Pattern ext = Pattern.compile("\\.(\\w*)$");
+        if (vals.length > 1 && !"html".equals(vals[vals.length - 1])) {
+            //System.out.println(url.getURL().toLowerCase());
+            if (ext.matcher(url.getURL().toLowerCase()).matches()) {
+                //System.out.println(ext.matcher(url.getURL().toLowerCase()).group());
+                // System.out.println(vals[vals.length - 1]);
+            }
+        }
     }
 
     @Override
