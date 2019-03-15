@@ -17,24 +17,11 @@ import java.util.regex.Pattern;
 public class Crawler extends WebCrawler {
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|bpm|jpe?g|png|mp3|mp4|zip|gz|xml|txt|pdf|))$");
 
-    private final HttpSolrClient solrClient = connectToSolrClient();
-
-    private HttpSolrClient connectToSolrClient() {
-        try {
-            return new HttpSolrClient.Builder("http://localhost:8983/solr/bigboxstore")
-                    .withConnectionTimeout(10000)
-                    .withSocketTimeout(60000)
-                    .build();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    private final HttpSolrClient solrClient = SolrUtil.connectToSolrClient();
 
     @Override
     public boolean shouldVisit(Page page, WebURL url) {
         checkIsHtml(url);
-
         return !FILTERS.matcher(url.getURL().toLowerCase()).matches()
                 && page.getStatusCode() >= 200 && page.getStatusCode() < 300;
     }
