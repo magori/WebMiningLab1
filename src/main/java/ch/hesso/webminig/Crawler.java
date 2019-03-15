@@ -9,9 +9,8 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -46,11 +45,6 @@ public class Crawler extends WebCrawler {
             Pattern.CASE_INSENSITIVE);
 
     /**
-     * Define Solr core URL to use for indexing.
-     **/
-    private final static String SOLR_CORE = "http://localhost:8983/solr";
-
-    /**
      * Define the number of threads to use during crawling.
      **/
     private final static int NUMBER_OF_CRAWLERS = 2;
@@ -64,11 +58,7 @@ public class Crawler extends WebCrawler {
     /**
      * Initialize Solr client on target core.
      **/
-    private final static SolrClient solrClient = new ConcurrentUpdateSolrClient
-            .Builder(SOLR_CORE)
-            .withConnectionTimeout(10000)
-            .withSocketTimeout(60000)
-            .build();
+    private final static HttpSolrClient solrClient = SolrUtil.connectToSolrClient();
 
     /**
      * Run crawler and indexing.
@@ -121,6 +111,9 @@ public class Crawler extends WebCrawler {
                 && href.startsWith(CRAWL_TARGET);
     }
 
+    /**
+     * Index useful information of StackOverflow question pages only.
+     */
     @Override
     public void visit(Page page) {
 
