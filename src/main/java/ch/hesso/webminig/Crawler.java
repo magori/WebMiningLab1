@@ -83,7 +83,7 @@ public class Crawler extends WebCrawler {
         config.setMaxDepthOfCrawling(-1);
         config.setPolitenessDelay(1000);
         config.setUserAgentString("crawler4j/WEM/2019/");
-        config.setMaxPagesToFetch(2000);
+        config.setMaxPagesToFetch(10000);
 
         // Instantiate controller for this crawl
         PageFetcher pageFetcher = new PageFetcher(config);
@@ -173,14 +173,14 @@ public class Crawler extends WebCrawler {
 
         // Add document into Solr
         SolrInputDocument solrDoc = new SolrInputDocument();
-        solrDoc.addField("id", page.hashCode());
-        solrDoc.addField("url", url);
-        solrDoc.addField("title", title);
-        solrDoc.addField("content", content);
-        solrDoc.addField("tags", tags);
-        solrDoc.addField("upvotes", upvotes);
-        solrDoc.addField("answered", answered);
-        solrDoc.addField("date", date);
+        solrDoc.setField("id", page.hashCode());
+        solrDoc.setField("url", url);
+        solrDoc.setField("title", title);
+        solrDoc.setField("content", content);
+        solrDoc.setField("tags", tags);
+        solrDoc.setField("upvotes", upvotes);
+        solrDoc.setField("answered", answered);
+        solrDoc.setField("date", date);
 
         try {
             solrClient.add(solrDoc);
