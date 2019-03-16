@@ -16,6 +16,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -47,7 +51,7 @@ public class Crawler extends WebCrawler {
     /**
      * Define the number of threads to use during crawling.
      **/
-    private final static int NUMBER_OF_CRAWLERS = 2;
+    private final static int NUMBER_OF_CRAWLERS = 1;
 
     /**
      * Regex allowing to filter file extensions.
@@ -77,7 +81,7 @@ public class Crawler extends WebCrawler {
         config.setIncludeHttpsPages(true);
         config.setIncludeBinaryContentInCrawling(false);
         config.setMaxDepthOfCrawling(-1);
-        config.setPolitenessDelay(500);
+        config.setPolitenessDelay(1000);
         config.setUserAgentString("crawler4j/WEM/2019/");
         config.setMaxPagesToFetch(2000);
 
@@ -144,28 +148,39 @@ public class Crawler extends WebCrawler {
         // Get tags
         List<String> tags = doc.select(".post-taglist .post-tag").eachText();
 
+        // Get upvotes
+        int upvotes = Integer.parseInt(doc.select(".question div[itemprop=upvoteCount]").text());
+
         // Get answered information
         boolean answered = doc.select(".accepted-answer").first() != null;
 
         // Get question creation date
-        String date = doc.select(".question-stats time[itemprop=dateCreated]").attr("datetime");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        Date date = null;
+        try {
+            date = dateFormatter.parse(doc.select(".question-stats time[itemprop=dateCreated]").attr("datetime"));
+        } catch (ParseException e) {
+            // ignoring
+        }
 
         // Debug only
         //System.out.printf("---\nNew document: %s\n", url);
         //System.out.printf("Title: %s\n", title);
         //System.out.printf("Tags: %s\n", String.join(", ", tags));
+        //System.out.printf("Upvotes?: %b\n", upvotes);
         //System.out.printf("Answered?: %b\n", answered);
         //System.out.printf("Creation: %s\n", date);
 
         // Add document into Solr
         SolrInputDocument solrDoc = new SolrInputDocument();
-        solrDoc.setField("id", page.hashCode());
-        solrDoc.setField("url", url);
-        solrDoc.setField("title", title);
-        solrDoc.setField("content", content);
-        solrDoc.setField("tags", tags);
-        solrDoc.setField("answered", answered);
-        solrDoc.setField("date", date);
+        solrDoc.addField("id", page.hashCode());
+        solrDoc.addField("url", url);
+        solrDoc.addField("title", title);
+        solrDoc.addField("content", content);
+        solrDoc.addField("tags", tags);
+        solrDoc.addField("upvotes", upvotes);
+        solrDoc.addField("answered", answered);
+        solrDoc.addField("date", date);
 
         try {
             solrClient.add(solrDoc);
