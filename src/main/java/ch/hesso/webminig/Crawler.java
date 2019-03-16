@@ -58,7 +58,7 @@ public class Crawler extends WebCrawler {
     /**
      * Initialize Solr client on target core.
      **/
-    private final static HttpSolrClient solrClient = SolrUtil.connectToSolrClient();
+    private final static HttpSolrClient solrClient = SolrUtil.connectToSolrClient("wemlabo1");
 
     /**
      * Run crawler and indexing.
@@ -77,7 +77,7 @@ public class Crawler extends WebCrawler {
         config.setIncludeHttpsPages(true);
         config.setIncludeBinaryContentInCrawling(false);
         config.setMaxDepthOfCrawling(-1);
-        config.setPolitenessDelay(250);
+        config.setPolitenessDelay(500);
         config.setUserAgentString("crawler4j/WEM/2019/");
         config.setMaxPagesToFetch(2000);
 
@@ -128,6 +128,9 @@ public class Crawler extends WebCrawler {
             return;
         }
 
+        // Debug only
+        //System.out.printf("Indexing %s\n", url);
+
         // Parse HTML content with jsoup
         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
         Document doc = Jsoup.parse(htmlParseData.getHtml());
@@ -165,8 +168,8 @@ public class Crawler extends WebCrawler {
         solrDoc.setField("date", date);
 
         try {
-            solrClient.add("wemlabo1", solrDoc);
-            solrClient.commit("wemlabo1");
+            solrClient.add(solrDoc);
+            solrClient.commit();
         } catch (SolrServerException | IOException e) {
             e.printStackTrace();
         }
