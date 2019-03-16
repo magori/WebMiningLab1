@@ -26,8 +26,9 @@ public class Search {
         try {
            /* final QueryResponse response = solr.query(queryParams);
             final SolrDocumentList documents = response.getResults();*/
-            SolrQuery q = new SolrQuery(String.format("(title:%s)", query));
-            q.setFields("title", "id");
+            SolrQuery q = new SolrQuery(String.format("(%s:%s)^3 (%s:'%s')^2 (%s:%s)^1", Fields.TITLE, query,Fields.CONTENT,query,Fields.TAGS,
+                                                      query));
+            q.setFields(Fields.TITLE, Fields.CONTENT, Fields.TAGS, Fields.UPVOTES, Fields.ANSWERED, Fields.URL, Fields.DATE, Fields.ID);
             q.setRows(20);
             final QueryResponse queryResponse = solrClient.query(q);
             final SolrDocumentList documents = queryResponse.getResults();
@@ -37,7 +38,7 @@ public class Search {
             System.out.println("NUMBER OF DOCUMENTS FOUND: " + documents.getNumFound());
             System.out.println("TOTAL DOCUMENTS IN INDEX: " + this.countNbDocumentsInIndex());
             System.out.println("===========================================");
-            documents.forEach(d -> printFields(d));
+            documents.forEach(Search::printFields);
         } catch (SolrServerException | IOException e) {
             e.printStackTrace();
         }

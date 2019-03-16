@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -30,44 +32,45 @@ import java.util.regex.Pattern;
  * @author Damien Rochat & Dorian Magnin
  */
 public class Crawler extends WebCrawler {
+    private static final List<String> PAGES_VISITED =  Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Define crawl seed URL.
      **/
-    private final static String CRAWL_SEED = "https://stackoverflow.com/";
+    private static final String CRAWL_SEED = "https://stackoverflow.com/";
 
     /**
      * Define crawl base domain to limit crawling.
      **/
-    private final static String CRAWL_TARGET = "https://stackoverflow.com/";
+    private static final String CRAWL_TARGET = "https://stackoverflow.com/";
 
     /**
      * Define URL pattern filter for indexing.
      * Allow to index only question pages.
      */
-    private final static Pattern INDEXING_FILTER = Pattern.compile("^https://stackoverflow.com/questions/[0-9]*/.*$",
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern INDEXING_FILTER = Pattern.compile("^https://stackoverflow.com/questions/[0-9]*/.*$", Pattern.CASE_INSENSITIVE);
 
     /**
      * Define the number of threads to use during crawling.
      **/
-    private final static int NUMBER_OF_CRAWLERS = 1;
+    private static final int NUMBER_OF_CRAWLERS = 8;
 
     /**
      * Regex allowing to filter file extensions.
      **/
-    private final static Pattern EXT_FILTERS = Pattern.compile(".*(\\.(css|js|gif|bpm|jpe?g|png"
-            + "|mp3|mp4|zip|gz|xml|txt|pdf|))$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern EXT_FILTERS = Pattern
+            .compile(".*(\\.(css|js|gif|bpm|jpe?g|png|mp3|mp4|zip|gz|xml|txt|pdf|))$", Pattern.CASE_INSENSITIVE);
 
     /**
      * Initialize Solr client on target core.
      **/
-    private final static HttpSolrClient solrClient = SolrUtil.connectToSolrClient("wemlabo1");
+    private static final HttpSolrClient solrClient = SolrUtil.connectToSolrClient("wemlabo1");
 
     /**
      * Run crawler and indexing.
      *
      * @param args
+     *
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
@@ -112,7 +115,10 @@ public class Crawler extends WebCrawler {
 
         return !EXT_FILTERS.matcher(href).matches()
                 && referringPage.getStatusCode() == 200
-                && href.startsWith(CRAWL_TARGET);
+                && href.startsWith(CRAWL_TARGET)
+                // Do not index other pages than question pages.
+                && INDEXING_FILTER.matcher(href).matches()
+                && !PAGES_VISITED.contains(href.split("\\?")[0]);
     }
 
     /**
@@ -123,12 +129,7 @@ public class Crawler extends WebCrawler {
 
         // Ignore non html content
         if (!(page.getParseData() instanceof HtmlParseData)) {
-            return;
-        }
-
-        // Do not index other pages than question pages.
-        String url = page.getWebURL().toString();
-        if (!INDEXING_FILTER.matcher(url).matches()) {
+            System.out.println(page.getContentType());
             return;
         }
 
@@ -171,16 +172,18 @@ public class Crawler extends WebCrawler {
         //System.out.printf("Answered?: %b\n", answered);
         //System.out.printf("Creation: %s\n", date);
 
+        String url = page.getWebURL().toString().split("\\?")[0];
+        PAGES_VISITED.add(url);
         // Add document into Solr
         SolrInputDocument solrDoc = new SolrInputDocument();
-        solrDoc.setField("id", page.hashCode());
-        solrDoc.setField("url", url);
-        solrDoc.setField("title", title);
-        solrDoc.setField("content", content);
-        solrDoc.setField("tags", tags);
-        solrDoc.setField("upvotes", upvotes);
-        solrDoc.setField("answered", answered);
-        solrDoc.setField("date", date);
+        solrDoc.setField(Fields.ID, url.hashCode());
+        solrDoc.setField(Fields.URL, url);
+        solrDoc.setField(Fields.TITLE, title);
+        solrDoc.setField(Fields.CONTENT, content);
+        solrDoc.setField(Fields.TAGS, tags);
+        solrDoc.setField(Fields.UPVOTES, upvotes);
+        solrDoc.setField(Fields.ANSWERED, answered);
+        solrDoc.setField(Fields.DATE, date);
 
         try {
             solrClient.add(solrDoc);
