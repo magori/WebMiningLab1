@@ -27,11 +27,16 @@ import java.util.regex.Pattern;
 
 /**
  * StackOverflow.com crawler, indexing title, tags, questions
- * and useful information in Apache SolR.
+ * and useful information in Apache Solr.
  *
  * @author Damien Rochat & Dorian Magnin
  */
 public class Crawler extends WebCrawler {
+
+    /**
+     * Store already visited pages, to prevent
+     * to index several times the same content.
+     */
     private static final List<String> PAGES_VISITED =  Collections.synchronizedList(new ArrayList<>());
 
     /**
