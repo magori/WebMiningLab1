@@ -106,23 +106,22 @@ public class Crawler extends WebCrawler {
     }
 
     /**
-     * Ignore pages with filtered file extension.
-     * Also ignores out of domain URLs and response code different than 200 (OK).
+     * Ignores:
+     * - Pages with filtered file extension
+     * - Out of domain pages
+     * - Already visited pages, but with different URL parameters
      */
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
 
         return !EXT_FILTERS.matcher(href).matches()
-                && referringPage.getStatusCode() == 200
                 && href.startsWith(CRAWL_TARGET)
-                // Do not index other pages than question pages.
-                && INDEXING_FILTER.matcher(href).matches()
                 && !PAGES_VISITED.contains(href.split("\\?")[0]);
     }
 
     /**
-     * Index useful information of StackOverflow question pages only.
+     * Index useful information of StackOverflow questions.
      */
     @Override
     public void visit(Page page) {
@@ -133,8 +132,17 @@ public class Crawler extends WebCrawler {
             return;
         }
 
+        // Get URL without parameters
+        String url = page.getWebURL().toString().split("\\?")[0];
+        PAGES_VISITED.add(url);
+
+        // Do not index other pages than question pages.
+        if (!INDEXING_FILTER.matcher(url).matches()) {
+            return;
+        }
+
         // Debug only
-        //System.out.printf("Indexing %s\n", url);
+        System.out.printf("Indexing %s\n", url);
 
         // Parse HTML content with jsoup
         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
@@ -172,8 +180,6 @@ public class Crawler extends WebCrawler {
         //System.out.printf("Answered?: %b\n", answered);
         //System.out.printf("Creation: %s\n", date);
 
-        String url = page.getWebURL().toString().split("\\?")[0];
-        PAGES_VISITED.add(url);
         // Add document into Solr
         SolrInputDocument solrDoc = new SolrInputDocument();
         solrDoc.setField(Fields.ID, url.hashCode());
