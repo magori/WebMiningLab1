@@ -62,7 +62,7 @@ public class Search {
                 Fields.TAGS, searchText, Fields.CONTENT, searchText));
 
         // Select fields and limit results
-        q.setFields(Fields.TITLE, Fields.TAGS, Fields.UPVOTES, Fields.ANSWERED, Fields.URL, Fields.DATE);
+        q.setFields(Fields.TITLE, Fields.TAGS, Fields.UPVOTES, Fields.ANSWERED, Fields.URL, Fields.DATE, "score");
         q.setRows(20);
 
         // Get documents
