@@ -52,14 +52,18 @@ public class Search {
      * Run query and display results.
      *
      * @param searchText
+     *
      * @throws IOException
      * @throws SolrServerException
      */
     private void executeQuery(final String searchText) throws IOException, SolrServerException {
 
         // Run query with more importance on title and tags
-        SolrQuery q = new SolrQuery(String.format("(%s:%s)^3 (%s:'%s')^2 (%s:%s)^1", Fields.TITLE, searchText,
-                Fields.TAGS, searchText, Fields.CONTENT, searchText));
+        SolrQuery q = new SolrQuery(String.format("(%s:\"%s\")^4 (%s:%s)^3 (%s:'%s')^2 (%s:%s)^1",
+                                                  Fields.TITLE, searchText,
+                                                  Fields.TITLE, searchText,
+                                                  Fields.TAGS, searchText,
+                                                  Fields.CONTENT, searchText));
 
         // Select fields and limit results
         q.setFields(Fields.TITLE, Fields.TAGS, Fields.UPVOTES, Fields.ANSWERED, Fields.URL, Fields.DATE, Fields.SCORE);
@@ -76,8 +80,7 @@ public class Search {
         if (documents.getNumFound() > 0) {
             System.out.println("Results:");
             documents.forEach(Search::printFields);
-        }
-        else {
+        } else {
             System.out.println("No result");
         }
     }
@@ -86,6 +89,7 @@ public class Search {
      * Count the number of documents in the index.
      *
      * @return
+     *
      * @throws IOException
      * @throws SolrServerException
      */
