@@ -9,4 +9,5 @@ public class Fields {
     public static final String UPVOTES = "upvotes";
     public static final String ANSWERED = "answered";
     public static final String DATE = "date";
+    public static final String SCORE = "score";
 }

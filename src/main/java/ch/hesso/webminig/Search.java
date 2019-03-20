@@ -62,7 +62,7 @@ public class Search {
                 Fields.TAGS, searchText, Fields.CONTENT, searchText));
 
         // Select fields and limit results
-        q.setFields(Fields.TITLE, Fields.TAGS, Fields.UPVOTES, Fields.ANSWERED, Fields.URL, Fields.DATE, "score");
+        q.setFields(Fields.TITLE, Fields.TAGS, Fields.UPVOTES, Fields.ANSWERED, Fields.URL, Fields.DATE, Fields.SCORE);
         q.setRows(20);
 
         // Get documents
@@ -103,6 +103,6 @@ public class Search {
      */
     private static void printFields(SolrDocument document) {
         System.out.println("-----");
-        document.getFieldNames().forEach(fieldName -> System.out.printf("%s: %s\n", fieldName, document.get(fieldName)));
+        document.getFieldNames().forEach(fieldName -> System.out.printf("%s: %s%n", fieldName, document.get(fieldName)));
     }
 }
