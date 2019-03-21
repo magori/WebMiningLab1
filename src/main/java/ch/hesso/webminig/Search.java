@@ -17,7 +17,6 @@ import java.io.InputStreamReader;
  *
  * @author Damien Rochat & Dorian Magnin
  */
-
 public class Search {
 
     /**
@@ -32,7 +31,7 @@ public class Search {
      *
      * @throws Exception
      */
-    public static void main(String[] args) throws IOException, SolrServerException {
+    public static void main(String... args) throws IOException, SolrServerException {
         Search search = new Search();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
