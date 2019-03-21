@@ -10,17 +10,15 @@
 \usepackage{color}
 \usepackage{hyperref}
 
-\lstset{basicstyle=\ttfamily\small,
-		keywordstyle=\color{keywords},
-		commentstyle=\color{comments},
-		stringstyle=\color{red},
-		numbers=left,
-		stepnumber=1,
-		showstringspaces=false,
-		breaklines=true,
-		breakatwhitespace=false,
-		identifierstyle=\color{green},
-		procnamekeys={def,class}}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.7}
+\definecolor{darkgreen}{rgb}{0.0,0.5,0.0}
+
+\lstset{
+	basicstyle=\ttfamily\small\color{darkblue},
+	stringstyle=\color{darkgreen},
+	breaklines=true,
+	breakatwhitespace=false
+}
 
 \usepackage{setspace} % increase interline spacing slightly
 \setstretch{1.1}
@@ -56,7 +54,7 @@
 	De plus, le crawler mémorise les pages visitées en ne tenant pas compte des paramètres d'URL afin de ne pas indexer plusieurs fois la même page.
 
 	Nous nous sommes très vite heurtés au problème de bannissement du site qui est visiblement très restrictif.
-	Après plusieurs tests, nous avons fini par utiliser un taux de 1 requête par secondes (politeness de 1000 ms).
+	Après plusieurs tests, nous avons fini par utiliser un taux de 1 requête par secondes (\emph{politeness} de 1000 ms).
 	Ceci rend l'indexation lente, mais nous ne subissons plus de blocage.
 	Après environ 1 heure, Solr avait indexé plus de 2'600 questions.
 
@@ -66,6 +64,9 @@
 		\caption{Statistiques du cœur Solr après crawling}
 	\end{figure}
 
+	Nous n'avons pas rencontré de problème de concurrence. Étant donné le \emph{politeness} assez haut,
+	l'attente entre deux mise à jour de l'index est particulièrement élevée.
+	
 	\section{Indexation spécialisée}
 	A l'aide de la librairie jsoup, nous avons récupéré plusieurs informations textuelles dans le code HTML de la page,
 	à savoir le titre de la question, son contenu, les tags que l'utilisateur lui a attribué.
@@ -90,7 +91,7 @@
 	Les champs « url », « upvotes », « answered » et « date » ne sont pas indexés,
 	mais simplement stockés afin de pouvoir être affichés dans les résutats de la recherche.
 	Ils sont stockés selon leur format correspondant. \\
-	Les champs « title » et « content » sont indexés (text\_general signifie que les textes seront mis en minuscule, tokenizés et que les stop words seront supprimés). \\
+	Les champs « title » et « content » sont indexés (« text\_general » signifie que les textes seront mis en minuscule, tokenizés et que les stop words seront supprimés). \\
 	Finalement, les questions peuvent être liées à plusieurs tags. Le champ « tags » est donc un texte, mais à valeurs multiples.
 	L'id du document est défini en hashant l'url de la page, avec la méthode « hashCode() ».
 	
